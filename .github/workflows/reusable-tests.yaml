@@ -36,6 +36,18 @@ env:
     ./target/
 
 jobs:
+  fmt:
+    name: Rustfmt (nightly)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@nightly
+        with:
+          toolchain: nightly-2026-01-15
+          components: rustfmt
+      - run: cargo fmt --all -- --check
+
   test-core:
     name: Core Tests
     runs-on: ubuntu-latest
@@ -54,7 +66,6 @@ jobs:
           path: ${{ env.CARGO_CACHE_PATH }}
           key: cargo-${{ runner.os }}-cargo-build-${{ hashFiles('**/Cargo.lock') }}
       - run: cargo build
-      - run: cargo fmt -- --check
       - run: cargo clippy --all-targets -- -D warnings
       - run: cargo test --workspace --exclude avm
       # using singlethreaded testing for avm so that tests that change files do not conflict with each other
@@ -513,3 +524,4 @@ jobs:
         name: ${{ matrix.node.path }} program test
 
       - uses: ./.github/actions/git-diff/
+
